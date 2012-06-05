@@ -1,0 +1,4 @@
+output.pdf
+*.iml
+.idea
+target/
