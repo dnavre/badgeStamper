@@ -1,10 +1,7 @@
 package com.fictionalrealm;
 
 import com.lowagie.text.DocumentException;
-import com.lowagie.text.Paragraph;
-import com.lowagie.text.pdf.PdfReader;
 
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
@@ -17,20 +14,14 @@ public class BadgeCycler {
     
     private final PersonListReader reader;
     private final BadgeStamper stamper;
-    private final BadgeStore store;
     
     public BadgeCycler(String inputPdf, String inputCsv, String outputPdf) throws BadgeGeneratorException {
         reader = initCsv(inputCsv);
-        stamper = initStamper(inputPdf);
-        store = initBadgeStore(outputPdf);
+        stamper = initStamper(inputPdf, outputPdf);
     }
 
-    private BadgeStamper initStamper(String inputPdf) throws BadgeGeneratorException {
-        return new BadgeStamper(inputPdf);
-    }
-
-    private BadgeStore initBadgeStore(String outputPdf) throws BadgeGeneratorException {
-        return new BadgeStore(outputPdf, stamper.getPageSize());
+    private BadgeStamper initStamper(String inputPdf, String outputPdf) throws BadgeGeneratorException {
+        return new BadgeStamper(inputPdf, outputPdf);
     }
 
     private PersonListReader initCsv(String inputCsv) throws BadgeGeneratorException {
@@ -48,9 +39,13 @@ public class BadgeCycler {
 
     public void cycle() throws BadgeGeneratorException {
         for (PersonRecord pr: reader) {
-            store.addBadge(new Paragraph("asdasd"));
+            try {
+                stamper.stamp(pr);
+            } catch (DocumentException e) {
+                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            }
         }
 
-        store.close();
+        stamper.close();
     }
 }

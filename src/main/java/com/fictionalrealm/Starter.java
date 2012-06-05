@@ -35,7 +35,7 @@ public class Starter {
             LoggerFactory.getLogger(mainLogger).error("Could not parse arguments");
             // TODO print options
         } catch (BadgeGeneratorException e) {
-            LoggerFactory.getLogger(mainLogger).error(e.getMessage());
+            LoggerFactory.getLogger(mainLogger).error(e.getMessage(), e);
         }
     }
     

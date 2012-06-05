@@ -9,4 +9,8 @@ public class BadgeGeneratorException extends Exception {
     public BadgeGeneratorException(String msg) {
         super(msg);
     }
+
+    public BadgeGeneratorException(String msg, Throwable t) {
+        super(msg, t);
+    }
 }
