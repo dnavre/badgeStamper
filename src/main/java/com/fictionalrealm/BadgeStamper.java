@@ -20,44 +20,57 @@ public class BadgeStamper {
     private final PdfReader pdf;
     private final Document doc;
     private final PdfWriter writer;
-    private int cardOnPage = 0;
-    private PdfPTable table;
     private final PdfTemplate badgeTemplate;
+    private final PdfContentByte cb;
+
+    private final BaseFont bFont;
 
     public BadgeStamper(String inputPdf, String outputFile) throws BadgeGeneratorException {
+
         try {
+            bFont = initFont();
+        }  catch (DocumentException e) {
+            throw new BadgeGeneratorException("Error while loading fonts", e);
+        } catch (IOException e) {
+            throw new BadgeGeneratorException("Error while loading fonts", e);
+        }
+
+        try {
+
             pdf = new PdfReader(new FileInputStream(inputPdf));
 
             if(pdf.getNumberOfPages() == 0) {
                 throw new BadgeGeneratorException("no pages detected in supplied sample PDF");
             }
 
-            doc  = new Document(PageSize.A4, 0, 0, 0, 0);
+            doc  = new Document(pdf.getPageSize(1), 0, 0, 0, 0);
             writer = PdfWriter.getInstance(doc, new FileOutputStream(outputFile));
             doc.open();
+            cb = writer.getDirectContent();
 
             badgeTemplate = getTemplate();
-
-            doc.newPage();
-            table = generateTable();
 
         } catch (FileNotFoundException e) {
             throw new BadgeGeneratorException("Can not open file " + outputFile + " for writing");
         } catch (IOException e) {
             throw new BadgeGeneratorException("Error reading PDF sample file " + inputPdf);
         } catch (DocumentException e) {
-            throw new BadgeGeneratorException("unexpected PDF document error", e);
+            throw new BadgeGeneratorException("Unexpected PDF document error", e);
         }
+    }
+
+    private BaseFont initFont() throws IOException, DocumentException {
+        BaseFont bf = BaseFont.createFont("c:/windows/fonts/arianamu.ttf", BaseFont.WINANSI, BaseFont.EMBEDDED);
+        
+        return bf;
     }
     
     private PdfTemplate getTemplate() throws DocumentException {
 
         PdfImportedPage p = writer.getImportedPage(pdf, 1);
-        Image img = Image.getInstance(p);
-        img.setAbsolutePosition(1, 1);
 
         PdfTemplate badgeTemplate = PdfTemplate.createTemplate(writer, 0, 0);
-        badgeTemplate.addImage(img);
+        badgeTemplate.addTemplate(p, 0, 0);
 
         return badgeTemplate;
     }
@@ -67,22 +80,19 @@ public class BadgeStamper {
     }
 
     public void stamp(PersonRecord pr) throws DocumentException {
+        doc.newPage();
+        
+        cb.addTemplate(writer.getImportedPage(pdf, 1), 0, 0);
 
-        if(cardOnPage++ >= NUMBER_OF_CARDS_PER_PAGE) {
-            doc.add(table);
-            writer.flush();
+        cb.beginText();
+        cb.setFontAndSize(bFont, 22);
+        cb.showTextAlignedKerned(PdfContentByte.ALIGN_LEFT, pr.getName(), 45, 170, 0);
+        cb.setFontAndSize(bFont, 11);
+        cb.showTextAlignedKerned(PdfContentByte.ALIGN_LEFT, pr.getEmail(), 55, 154, 0);
+        cb.showTextAlignedKerned(PdfContentByte.ALIGN_RIGHT, pr.getOrganization(), 220, 60, 0);
+        cb.endText();
 
-            doc.newPage();
-            cardOnPage = 0;
-            table = generateTable();
-        }
-
-        PdfContentByte c = new PdfContentByte ();
-
-        Image img = Image.getInstance(badgeTemplate);
-        img.setAbsolutePosition(1,1);
-
-        table.addCell(c);
+        writer.flush();
     }
 
     public void close() {
