@@ -5,8 +5,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.fictionalrealm</groupId>
-    <artifactId>badgeGenerator</artifactId>
-    <version>1.0</version>
+    <artifactId>badgeStamper</artifactId>
+    <version>0.1</version>
 
     <build>
         <plugins>
@@ -57,6 +57,21 @@
             <version>1.0.3</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.google.zxing</groupId>
+            <artifactId>core</artifactId>
+            <version>2.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>net.sourceforge.cardme</groupId>
+            <artifactId>cardme</artifactId>
+            <version>0.3.3</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/cardme-0.3.3.jar</systemPath>
+        </dependency>
+
     </dependencies>
-    
+
+
 </project>
